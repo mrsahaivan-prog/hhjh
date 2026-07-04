@@ -201,7 +201,7 @@ export default function App() {
           </h1>
 
           <p className="text-[9.5px] sm:text-[10px] font-mono text-mz-cyan tracking-[0.16em] uppercase font-bold text-glow-cyan">
-            L'opportunité conçue pour créer les futurs millionnaires de cette génération.
+            Vous avez rejoint l'opportunité conçue pour créer les futurs millionnaires de cette génération.
           </p>
         </div>
 
