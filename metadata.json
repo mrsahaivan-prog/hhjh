@@ -1,0 +1,6 @@
+{
+  "name": "MZ+ Félicitations",
+  "description": "Page de félicitations ultra-premium, immersive et interactive pour les membres fondateurs de MZ+",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
