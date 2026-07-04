@@ -3,15 +3,58 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { playSuccessChime } from './components/AudioEngine';
 import { ConfettiShower } from './components/ConfettiShower';
+
+interface Country {
+  name: string;
+  flag: string;
+}
+
+// French-speaking African countries
+const AFRICAN_FRANCOPHONE_COUNTRIES: Country[] = [
+  { name: 'Sénégal', flag: '🇸🇳' },
+  { name: 'Côte d\'Ivoire', flag: '🇨🇮' },
+  { name: 'Cameroun', flag: '🇨🇲' },
+  { name: 'Gabon', flag: '🇬🇦' },
+  { name: 'Mali', flag: '🇲🇱' },
+  { name: 'Maroc', flag: '🇲🇦' },
+  { name: 'Algérie', flag: '🇩🇿' },
+  { name: 'Tunisie', flag: '🇹🇳' },
+  { name: 'Congo (Brazzaville)', flag: '🇨🇬' },
+  { name: 'Rép. Dém. du Congo', flag: '🇨🇩' },
+  { name: 'Bénin', flag: '🇧🇯' },
+  { name: 'Togo', flag: '🇹🇬' },
+  { name: 'Guinée', flag: '🇬🇳' },
+  { name: 'Burkina Faso', flag: '🇧🇫' },
+  { name: 'Niger', flag: '🇳🇪' },
+  { name: 'Tchad', flag: '🇹🇩' },
+  { name: 'République Centrafricaine', flag: '🇨🇫' },
+  { name: 'Madagascar', flag: '🇲🇬' },
+  { name: 'Rwanda', flag: '🇷🇼' },
+  { name: 'Burundi', flag: '🇧🇮' },
+  { name: 'Djibouti', flag: '🇩🇯' },
+  { name: 'Comores', flag: '🇰🇲' },
+  { name: 'Mauritanie', flag: '🇲🇷' },
+];
 
 export default function App() {
   const [confettiTrigger, setConfettiTrigger] = useState(0);
 
-  // Play a welcoming premium chime on initial render
+  // Editable fields
+  const [name, setName] = useState('Alexandre Gauthier');
+  const [selectedCountry, setSelectedCountry] = useState<Country>(AFRICAN_FRANCOPHONE_COUNTRIES[0]); // Senegal default or France? Let's default to Senegal 🇸🇳 or France if needed. Let's add France at the end just in case, but keep focus on requested African Francophone countries.
+  
+  // States for inline editing
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingCountry, setIsEditingCountry] = useState(false);
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const countrySelectRef = useRef<HTMLSelectElement>(null);
+
+  // Play welcoming premium chime on initial render
   useEffect(() => {
     const timer = setTimeout(() => {
       setConfettiTrigger((prev) => prev + 1);
@@ -20,9 +63,35 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (isEditingName && nameInputRef.current) {
+      nameInputRef.current.focus();
+      nameInputRef.current.select();
+    }
+  }, [isEditingName]);
+
+  useEffect(() => {
+    if (isEditingCountry && countrySelectRef.current) {
+      countrySelectRef.current.focus();
+    }
+  }, [isEditingCountry]);
+
   const triggerCelebration = () => {
     setConfettiTrigger((prev) => prev + 1);
     playSuccessChime();
+  };
+
+  const handleNameBlur = () => {
+    setIsEditingName(false);
+    if (!name.trim()) {
+      setName('Alexandre Gauthier');
+    }
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      nameInputRef.current?.blur();
+    }
   };
 
   return (
@@ -34,13 +103,12 @@ export default function App() {
       <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[60%] h-[35%] rounded-full bg-gradient-to-r from-mz-cyan/15 via-mz-purple/40 to-mz-gold/15 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full bg-mz-blue/5 blur-[100px] pointer-events-none" />
 
-      {/* 2. Main High-Density Social Proof Card Container (Completely compact for screenshot) */}
+      {/* 2. Main Compact High-Density Social Proof Card Container */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
-        onClick={triggerCelebration}
-        className="cursor-pointer relative w-full max-w-md rounded-[2rem] p-6 sm:p-8 border border-white/10 bg-[#060814]/90 backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col items-center text-center space-y-5"
+        className="relative w-full max-w-md rounded-[2rem] p-6 sm:p-8 border border-white/10 bg-[#060814]/90 backdrop-blur-3xl shadow-2xl overflow-hidden flex flex-col items-center text-center space-y-5"
         id="premium-social-proof-certificate"
       >
         {/* Holographic metallic shine overlay across the card */}
@@ -59,19 +127,81 @@ export default function App() {
         </div>
 
         {/* MID HEADER: Badge & Title */}
-        <div className="space-y-3 relative z-10">
+        <div className="space-y-3 relative z-10 w-full">
           {/* Elite dynamic badge requested */}
           <div className="inline-flex items-center space-x-1.5 bg-mz-gold/10 border border-mz-gold/20 rounded-full px-3 py-1 text-[9px] text-mz-gold font-mono tracking-widest uppercase">
             <span className="w-1 h-1 rounded-full bg-mz-gold animate-ping" />
             <span>INSCRIPTION CONFIRMÉE • PREMIER REGISTRE</span>
           </div>
 
-          <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-white leading-tight">
-            🎉 Félicitations <span className="text-transparent bg-clip-text bg-gradient-to-r from-mz-gold via-[#fff1cc] to-mz-gold text-glow-gold">Alexandre Gauthier</span> <span className="inline-block animate-bounce" style={{ animationDuration: '3s' }}>🇫🇷</span> !
+          {/* Interactive Editable Header */}
+          <h1 className="font-display font-black text-2xl sm:text-3xl tracking-tight text-white leading-tight flex flex-wrap items-center justify-center gap-x-1.5">
+            <span>🎉 Félicitations</span> 
+            
+            {/* Inline Name Editor */}
+            {isEditingName ? (
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={handleNameBlur}
+                onKeyDown={handleNameKeyDown}
+                maxLength={24}
+                className="bg-white/10 border border-mz-gold text-mz-gold rounded px-1.5 py-0.5 text-2xl font-black focus:outline-none focus:ring-1 focus:ring-mz-gold max-w-[200px]"
+              />
+            ) : (
+              <span 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingName(true);
+                }}
+                className="text-transparent bg-clip-text bg-gradient-to-r from-mz-gold via-[#fff1cc] to-mz-gold text-glow-gold cursor-pointer hover:underline decoration-mz-gold/50"
+                title="Cliquez pour modifier le nom"
+              >
+                {name}
+              </span>
+            )}
+
+            {/* Inline Country Selector */}
+            {isEditingCountry ? (
+              <select
+                ref={countrySelectRef}
+                value={selectedCountry.name}
+                onChange={(e) => {
+                  const matched = AFRICAN_FRANCOPHONE_COUNTRIES.find(c => c.name === e.target.value);
+                  if (matched) {
+                    setSelectedCountry(matched);
+                  }
+                  setIsEditingCountry(false);
+                }}
+                onBlur={() => setIsEditingCountry(false)}
+                className="bg-[#060814] border border-mz-cyan text-mz-cyan rounded px-1 py-0.5 text-lg font-bold focus:outline-none focus:ring-1 focus:ring-mz-cyan"
+              >
+                {AFRICAN_FRANCOPHONE_COUNTRIES.map((c) => (
+                  <option key={c.name} value={c.name} className="bg-[#03040b] text-white">
+                    {c.flag} {c.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditingCountry(true);
+                }}
+                className="inline-block animate-bounce cursor-pointer hover:scale-125 transition-transform"
+                style={{ animationDuration: '3s' }}
+                title="Cliquez pour choisir un pays africain francophone"
+              >
+                {selectedCountry.flag}
+              </span>
+            )}
+            <span>!</span>
           </h1>
 
-          <p className="text-[10px] font-mono text-mz-cyan tracking-[0.18em] uppercase font-bold text-glow-cyan">
-            L'opportunité conçue pour créer les futurs pionniers.
+          <p className="text-[9.5px] sm:text-[10px] font-mono text-mz-cyan tracking-[0.16em] uppercase font-bold text-glow-cyan">
+            L'opportunité conçue pour créer les futurs millionnaires de cette génération.
           </p>
         </div>
 
@@ -112,8 +242,8 @@ export default function App() {
         </div>
 
         {/* Helper instruction */}
-        <p className="text-[8px] font-mono text-white/30 tracking-wider">
-          💡 TOUCHEZ POUR DÉCLENCHER CONFETTIS & SONS
+        <p className="text-[7.5px] font-mono text-white/30 tracking-wider">
+          💡 CLIQUEZ SUR LE NOM OU LE DRAPEAU POUR MODIFIER • TOUCHEZ POUR LES CONFETTIS
         </p>
       </motion.div>
 
